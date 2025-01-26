@@ -1,0 +1,11 @@
+.q-btn {
+  i::before {
+    font-size: 20px;
+  }
+
+  &.remove-btn {
+    ::before {
+      font-size: 12px;
+    }
+  }
+}
