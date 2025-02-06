@@ -4,6 +4,7 @@ export interface Calculator {
     | 'continuing-education-fund-calculator'
     | 'general-investment-calculator'
   name: string
+  id: string
   options: {
     currentAccumulatedAmount?: number
     monthlyContribution?: number
@@ -17,6 +18,7 @@ export interface Calculator {
     monthlyContributionPercentage?: number
     periodicDeposits?: PeriodicDeposit[]
     overTaxCeilingDeposit?: boolean
+    isTaxFreeDeposit?: boolean
   }
 }
 

@@ -34,20 +34,20 @@
               <span>מחשבון פנסיה</span>
             </q-item>
             <!-- <q-item
-            clickable
-            v-close-popup
-            @click="addContinuingEducationFundCalculator"
-            class="row items-center"
+              clickable
+              v-close-popup
+              @click="addContinuingEducationFundCalculator"
+              class="row items-center"
             >
-            <span>מחשבון קרן השתלמות</span>
-          </q-item> -->
+              <span>מחשבון קרן השתלמות</span>
+            </q-item> -->
             <q-item
               clickable
               v-close-popup
               @click="addInvestmentCalculator"
               class="row items-center"
             >
-              <span>מחשבון כללי</span>
+              <span>מחשבון השקעות</span>
             </q-item>
           </q-list>
         </q-menu>
@@ -58,19 +58,66 @@
       </q-btn>
     </section>
 
-    <section class="calculators-container-wrapper">
-      <section class="calculators-container q-mt-sm row no-wrap q-gutter-md items-start">
-        <component
-          v-for="(calculator, i) in calculators"
-          :key="i"
-          :is="calculator.type"
-          :calculator="calculator"
-          @update-options="updateOptions(i, $event)"
-          @update-name="updateName(i, $event)"
-          @remove="removeCalculator(i)"
-        ></component>
-      </section>
-    </section>
+    <q-tabs
+      v-model="selectedTab"
+      active-color="primary"
+      indicator-color="primary"
+      align="left"
+      class="q-mt-md"
+    >
+      <q-tab class="q-px-lg" name="פנסיה" label="פנסיה" />
+      <q-tab class="q-px-lg" name="השקעות" label="השקעות" />
+    </q-tabs>
+
+    <q-separator />
+
+    <q-tab-panels v-model="selectedTab" animated>
+      <q-tab-panel name="פנסיה">
+        <div v-if="!retirementsCalculators.length">
+          <div class="help-section row items-center">
+            <q-icon name="fa-solid fa-exclamation" size="sm" class="q-mr-md" />
+            <div>הוסף מחשבון פנסיה על מנת להתחיל לחשב</div>
+          </div>
+          <q-btn icon="fa-regular fa-plus" @click="addRetirementCalculator"
+            >הוסף מחשבון פנסיה</q-btn
+          >
+        </div>
+        <div v-else class="row q-gutter-md">
+          <component
+            v-for="calculator in retirementsCalculators"
+            :key="calculator.id"
+            :is="calculator.type"
+            :calculator="calculator"
+            @update-options="updateOptions(calculator.id, $event)"
+            @update-name="updateName(calculator.id, $event)"
+            @remove="removeCalculator(calculator.id)"
+          ></component>
+        </div>
+      </q-tab-panel>
+
+      <q-tab-panel name="השקעות">
+        <div v-if="!investmentCalculators.length">
+          <div class="help-section row items-center">
+            <q-icon name="fa-solid fa-exclamation" size="sm" class="q-mr-md" />
+            <div>הוסף מחשבון השקעות על מנת להתחיל לחשב</div>
+          </div>
+          <q-btn icon="fa-regular fa-plus" @click="addInvestmentCalculator"
+            >הוסף מחשבון השקעות</q-btn
+          >
+        </div>
+        <div v-else class="row q-gutter-md">
+          <component
+            v-for="calculator in investmentCalculators"
+            :key="calculator.id"
+            :is="calculator.type"
+            :calculator="calculator"
+            @update-options="updateOptions(calculator.id, $event)"
+            @update-name="updateName(calculator.id, $event)"
+            @remove="removeCalculator(calculator.id)"
+          ></component>
+        </div>
+      </q-tab-panel>
+    </q-tab-panels>
   </main>
 </template>
 
@@ -82,6 +129,8 @@ import { GeneralInvestmentCalculator } from '@/components/investment-calculator'
 import { ContinuingEducationFundCalculator } from '@/components/continuing-education-fund-calculator'
 // Models
 import type { Calculator } from '@/models/calculator.model'
+// Utils
+import { uid } from 'quasar'
 
 export default defineComponent({
   name: 'home-page',
@@ -93,6 +142,7 @@ export default defineComponent({
   data() {
     return {
       calculators: [] as Calculator[],
+      selectedTab: 'פנסיה',
     }
   },
   created() {
@@ -101,11 +151,22 @@ export default defineComponent({
       this.calculators = JSON.parse(calculators)
     }
   },
+  computed: {
+    retirementsCalculators() {
+      return this.calculators.filter((calculator) => calculator.type === 'retirement-calculator')
+    },
+    investmentCalculators() {
+      return this.calculators.filter(
+        (calculator) => calculator.type === 'general-investment-calculator',
+      )
+    },
+  },
   methods: {
     addRetirementCalculator() {
       this.calculators.push({
         type: 'retirement-calculator',
         name: 'מחשבון פנסיה',
+        id: uid(),
         options: {
           currentAccumulatedAmount: 0,
           monthlyIncome: 0,
@@ -116,11 +177,13 @@ export default defineComponent({
           interestRate: 0,
         },
       })
+      this.selectedTab = 'פנסיה'
     },
     addContinuingEducationFundCalculator() {
       this.calculators.push({
         type: 'continuing-education-fund-calculator',
         name: 'מחשבון קרן השתלמות',
+        id: uid(),
         options: {
           currentAccumulatedAmount: 0,
           monthlyIncome: 0,
@@ -128,14 +191,15 @@ export default defineComponent({
           depositFee: 0,
           yearsToCalculation: 0,
           interestRate: 0,
-          overTaxCeilingDeposit: false,
+          isTaxFreeDeposit: false,
         },
       })
     },
     addInvestmentCalculator() {
       this.calculators.push({
         type: 'general-investment-calculator',
-        name: 'מחשבון כללי',
+        name: 'מחשבון השקעות',
+        id: uid(),
         options: {
           currentAccumulatedAmount: 0,
           monthlyContribution: 0,
@@ -148,15 +212,20 @@ export default defineComponent({
           reduceTaxAnnually: false,
         },
       })
+      this.selectedTab = 'השקעות'
     },
-    removeCalculator(index: number) {
-      this.calculators.splice(index, 1)
+    removeCalculator(id: string) {
+      this.calculators = this.calculators.filter((calculator) => calculator.id !== id)
     },
-    updateOptions(index: number, options: Record<string, unknown>) {
-      this.calculators[index] = { ...this.calculators[index], options }
+    updateOptions(id: string, options: Record<string, unknown>) {
+      this.calculators = this.calculators.map((calculator) =>
+        id === calculator.id ? { ...calculator, options } : calculator,
+      )
     },
-    updateName(index: number, name: string) {
-      this.calculators[index] = { ...this.calculators[index], name }
+    updateName(id: string, name: string) {
+      this.calculators = this.calculators.map((calculator) =>
+        id === calculator.id ? { ...calculator, name } : calculator,
+      )
     },
     saveData() {
       localStorage.setItem('calculators', JSON.stringify(this.calculators))
@@ -182,10 +251,11 @@ export default defineComponent({
 }
 
 .help-section {
+  width: fit-content;
   border-radius: 4px;
   border: 1px solid #21ba45;
   background-color: #daf8e1;
   padding: 8px 16px;
-  margin: 16px 0;
+  margin: 8px 0;
 }
 </style>

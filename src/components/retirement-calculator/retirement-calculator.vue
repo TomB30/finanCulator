@@ -70,9 +70,11 @@
     </div>
     <table v-if="calculator.options.yearsToCalculation">
       <thead>
-        <th>שנים</th>
-        <th>סכום צבירה</th>
-        <th>דמי ניהול</th>
+        <tr>
+          <th>שנים</th>
+          <th>סכום צבירה</th>
+          <th>דמי ניהול</th>
+        </tr>
       </thead>
       <tbody>
         <tr v-for="(year, i) in retirementFundOverYears" :key="i">

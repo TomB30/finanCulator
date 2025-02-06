@@ -59,11 +59,14 @@
         type="number"
       />
       <q-toggle
+        dense
         :model-value="calculator.options.reduceTaxAnnually"
         @update:model-value="updateReduceTaxAnnually"
         label="תשלום מס שנתי"
         left-label
-      />
+      >
+        <q-tooltip> תשלום מס על רווחי הון כל שנה במקום בסיום התקופה. </q-tooltip>
+      </q-toggle>
     </div>
     <q-btn color="primary" class="q-ma-sm" size="sm" @click="addDeposit">
       הוסף הפקדה מחזורית / חד פעמית
@@ -123,10 +126,12 @@
     </div>
     <table v-if="calculator.options.yearsToCalculation">
       <thead>
-        <th>שנים</th>
-        <th>סכום צבירה</th>
-        <th>דמי ניהול</th>
-        <th>מס הכנסה</th>
+        <tr>
+          <th>שנים</th>
+          <th>סכום צבירה</th>
+          <th>דמי ניהול</th>
+          <th>מס הכנסה</th>
+        </tr>
       </thead>
       <tbody>
         <tr v-for="(fundCalculation, i) in investmentOverYears" :key="i">
@@ -271,7 +276,10 @@ export default defineComponent({
     .periodic-deposit-amount-input,
     .periodic-deposit-months-input,
     .periodic-deposit-num-of-deposits-input {
-      width: 80px;
+      width: 65px;
+    }
+    .periodic-deposit-amount-input {
+      width: 70px;
     }
 
     .periodic-deposit-date-input {
